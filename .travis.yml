@@ -1,0 +1,6 @@
+language: python
+install:
+  - pip install getfilelistpy
+
+script:
+  - python ./tests/test_getfilelist.py
