@@ -24,7 +24,7 @@ res = getfilelist.GetFolderTree(resource)
 __author__ = "Kanshi TANAIKE (tanaike@hotmail.com)"
 __copyright__ = "Copyright 2018, Kanshi TANAIKE"
 __license__ = "MIT"
-__version__ = "1.00"
+__version__ = "1.0.1"
 
 from apiclient.discovery import build
 import collections as cl

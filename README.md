@@ -20,6 +20,8 @@ When I create applications for using Google Drive, I often retrieve a file list 
 $ pip install getfilelistpy
 ~~~
 
+You can also check this library at [https://pypi.org/project/getfilelistpy/](https://pypi.org/project/getfilelistpy/).
+
 # Method
 | Method | Explanation |
 |:---|:---|

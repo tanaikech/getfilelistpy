@@ -5,10 +5,14 @@ from setuptools import setup, find_packages
 
 __author__ = 'Kanshi TANAIKE'
 
+with open('README.md') as f:
+    readme = f.read()
+
 setup(
     name='getfilelistpy',
-    version='1.0.0',
+    version='1.0.1',
     description='This is a python library to retrieve the file list with the folder tree from the specific folder of Google Drive.',
+    long_description=readme,
     author='Kanshi TANAIKE',
     author_email='tanaike@hotmail.com',
     install_requires=['google-api-python-client'],
