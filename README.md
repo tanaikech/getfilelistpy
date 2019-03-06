@@ -111,7 +111,7 @@ from google.oauth2 import service_account
 from getfilelistpy import getfilelist
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
-SERVICE_ACCOUNT_FILE = './so12-c78fff17f4a7.json'
+SERVICE_ACCOUNT_FILE = 'service-account-credentials.json'
 credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
 resource = {
