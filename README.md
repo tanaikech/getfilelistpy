@@ -316,5 +316,8 @@ If you have any questions and commissions for me, feel free to tell me.
 
     1. Initial release.
 
+* v1.0.3 (July 16, 2019)
+
+    1. Markdown format was used to the readme file at [https://pypi.org/project/getfilelistpy/](https://pypi.org/project/getfilelistpy/).
 
 [TOP](#TOP)
