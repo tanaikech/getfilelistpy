@@ -27,6 +27,7 @@ __license__ = "MIT"
 __version__ = "1.0.1"
 
 from apiclient.discovery import build
+from googleapiclient.discovery import build
 import collections as cl
 import googleapiclient
 import sys
@@ -45,21 +46,29 @@ class getfilelist():
 
     def __init__(self, resource):
         self.id = resource["id"] if "id" in resource.keys() else None
-        self.fields = resource["fields"] if "fields" in resource.keys() else None
+        self.fields = resource["fields"] if "fields" in resource.keys(
+        ) else None
         self.service = self.__getService(resource)
         self.e = {}
         self.e["chkAuth"] = self.__checkauth(resource)
         self.__init()
 
     def __getService(self, resource):
+        api = 'drive'
+        version = 'v3'
         if "oauth2" in resource.keys():
-            return build('drive', 'v3', http=resource["oauth2"])
+            creds = resource["oauth2"]
+            if hasattr(creds, 'credentials') and not hasattr(creds, '_refresh_token'):
+                return build(api, version, http=creds)
+            if not hasattr(creds, 'credentials') and hasattr(creds, '_refresh_token'):
+                return build(api, version, credentials=creds)
         if "api_key" in resource.keys():
-            return build('drive', 'v3', developerKey=resource["api_key"])
+            return build(api, version, developerKey=resource["api_key"])
         if "service_account" in resource.keys():
-            return build('drive', 'v3', credentials=resource["service_account"])
+            return build(api, version, credentials=resource["service_account"])
         try:
-            raise ValueError("Error: You can use API key, OAuth2 and Service account.")
+            raise ValueError(
+                "Error: You can use API key, OAuth2 and Service account.")
         except ValueError as err:
             print(err)
             sys.exit(1)
@@ -124,17 +133,20 @@ class getfilelist():
         p = list(parents)
         p.append(idd)
         for e in files:
-            obj = {"name": e.get("name"), "id": e.get("id"), "parent": e.get("parents")[0], "tree": p}
+            obj = {"name": e.get("name"), "id": e.get(
+                "id"), "parent": e.get("parents")[0], "tree": p}
             temp.append(obj)
         if len(temp) > 0:
             folders["temp"].append(temp)
             for e in temp:
-                self.__getAllfoldersRecursively(e.get("id"), e.get("tree"), folders)
+                self.__getAllfoldersRecursively(
+                    e.get("id"), e.get("tree"), folders)
         return folders
 
     def __getFolderTreeRecursively(self):
         folderTr = {"search": self.e["searchedFolder"]["id"], "temp": []}
-        value = self.__getAllfoldersRecursively(self.e["searchedFolder"]["id"], [], folderTr)
+        value = self.__getAllfoldersRecursively(
+            self.e["searchedFolder"]["id"], [], folderTr)
         return self.__getDlFoldersS(self.e["searchedFolder"].get("name"), value)
 
     def __createFolderTreeID(self, fm, idd, parents, fls):
@@ -143,7 +155,8 @@ class getfilelist():
         p.append(idd)
         for e in fm:
             if ("parents" in e) and (len(e["parents"]) > 0) and (e["parents"][0] == idd):
-                t = {"name": e["name"], "id": e["id"], "parent": e["parents"][0], "tree": p}
+                t = {"name": e["name"], "id": e["id"],
+                     "parent": e["parents"][0], "tree": p}
                 temp.append(t)
         if len(temp) > 0:
             fls["temp"].append(temp)
@@ -156,7 +169,8 @@ class getfilelist():
         fields = "files(id,mimeType,name,parents,size),nextPageToken"
         files = self.__getListLoop(q, fields, [])
         tr = {"search": self.e["searchedFolder"]["id"], "temp": []}
-        value = self.__createFolderTreeID(files, self.e["searchedFolder"]["id"], [], tr)
+        value = self.__createFolderTreeID(
+            files, self.e["searchedFolder"]["id"], [], tr)
         return self.__getDlFoldersS(self.e["searchedFolder"]["name"], value)
 
     def __checkauth(self, resource):
@@ -172,7 +186,8 @@ class getfilelist():
         self.e["rootId"] = self.id is None or self.id.lower() == "root"
         if not self.e["chkAuth"] and self.e["rootId"]:
             try:
-                raise ValueError("Error: All folders in Google Drive cannot be retrieved using API key. Please use OAuth2.")
+                raise ValueError(
+                    "Error: All folders in Google Drive cannot be retrieved using API key. Please use OAuth2.")
             except ValueError as err:
                 print(err)
                 sys.exit(1)
@@ -182,12 +197,14 @@ class getfilelist():
         except googleapiclient.errors.HttpError:
             print("Error: Folder ID of '%s' cannot be retrieved. Please confirm whether the folder ID is existing, or the owner of file is that of account. If you want to retrieve other user's folder, please check whether the folder is shared." % self.id)
             sys.exit(1)
-        self.e["method"] = (self.e["chkAuth"] or self.e["rootId"]) and not self.e["searchedFolder"].get("shared")
+        self.e["method"] = (self.e["chkAuth"] or self.e["rootId"]
+                            ) and not self.e["searchedFolder"].get("shared")
         return
 
     def getFileList(self):
         """This is a method for retrieving file list."""
-        folderTree = self.__getFromAllFolders() if self.e["method"] else self.__getFolderTreeRecursively()
+        folderTree = self.__getFromAllFolders(
+        ) if self.e["method"] else self.__getFolderTreeRecursively()
         return self.__getFilesFromFolder(folderTree)
 
     def getFolderTree(self):

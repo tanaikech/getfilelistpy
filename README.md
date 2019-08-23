@@ -1,60 +1,68 @@
-getfilelistpy
-====
+# getfilelistpy
 
 [![Build Status](https://travis-ci.org/tanaikech/getfilelistpy.svg?branch=master)](https://travis-ci.org/tanaikech/getfilelistpy)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENCE)
 
-<a name="TOP"></a>
+<a name="top"></a>
+
 # Overview
+
 This is a python library to retrieve the file list with the folder tree from the specific folder of Google Drive.
 
 # Description
+
 When I create applications for using Google Drive, I often retrieve a file list from a folder in the application. So far, I had created the script for retrieving a file list from a folder for each application. Recently, I thought that if there is the script for retrieving the file list with the folder tree from the folder of Google Drive as a library, it will be useful for me and other users. So I created this.
 
 ## Features
+
 - This library retrieves all files from a folder in Google Drive.
 - All files include the folder structure in Google Drive.
 - Only folder tree can be also retrieved.
 
 # Install
-~~~
+
+```
 $ pip install getfilelistpy
-~~~
+```
 
 You can also check this library at [https://pypi.org/project/getfilelistpy/](https://pypi.org/project/getfilelistpy/).
 
 # Method
-| Method | Explanation |
-|:---|:---|
-| GetFolderTree(object) | Retrieve only folder structure from a folder |
-| GetFileList(object) | Retrieve file list with folder structure from a folder |
+
+| Method                | Explanation                                            |
+| :-------------------- | :----------------------------------------------------- |
+| GetFolderTree(object) | Retrieve only folder structure from a folder           |
+| GetFileList(object)   | Retrieve file list with folder structure from a folder |
 
 # Usage
+
 There are 3 patterns for using this library.
 
 ## 1. Use API key
+
 This is a sample script using API key. When you want to retrieve the API key, please do the following flow.
 
 1. Login to Google.
 2. Access to [https://console.cloud.google.com/?hl=en](https://console.cloud.google.com/?hl=en).
 3. Click select project at the right side of "Google Cloud Platform" of upper left of window.
 4. Click "NEW PROJECT"
-    1. Input "Project Name".
-    2. Click "CREATE".
-    3. Open the created project.
-    4. Click "Enable APIs and get credentials like keys".
-    5. Click "Library" at left side.
-    6. Input "Drive API" in "Search for APIs & Services".
-    7. Click "Google Drive API".
-    8. Click "ENABLE".
-    9. Back to [https://console.cloud.google.com/?hl=en](https://console.cloud.google.com/?hl=en).
-    10. Click "Enable APIs and get credentials like keys".
-    11. Click "Credentials" at left side.
-    12. Click "Create credentials" and select API key.
-    13. Copy the API key. You can use this API key.
+   1. Input "Project Name".
+   2. Click "CREATE".
+   3. Open the created project.
+   4. Click "Enable APIs and get credentials like keys".
+   5. Click "Library" at left side.
+   6. Input "Drive API" in "Search for APIs & Services".
+   7. Click "Google Drive API".
+   8. Click "ENABLE".
+   9. Back to [https://console.cloud.google.com/?hl=en](https://console.cloud.google.com/?hl=en).
+   10. Click "Enable APIs and get credentials like keys".
+   11. Click "Credentials" at left side.
+   12. Click "Create credentials" and select API key.
+   13. Copy the API key. You can use this API key.
 
 ### Sample script
-~~~python
+
+```python
 from getfilelistpy import getfilelist
 
 resource = {
@@ -64,19 +72,22 @@ resource = {
 }
 res = getfilelist.GetFileList(resource)  # or r = getfilelist.GetFolderTree(resource)
 print(res)
-~~~
+```
 
 ### Note
+
 - **When you want to retrieve the file list from the folder using API key, the folder is required to be shared.**
-- You can modify the property of ``fields``. When this is not used, the default fields are used.
+- You can modify the property of `fields`. When this is not used, the default fields are used.
 
 ## 2. Use OAuth2
+
 Document of OAuth2 is [here](https://developers.google.com/identity/protocols/OAuth2).
 
-### Sample script
-In this sample script, the process of OAuth2 uses [the quickstart of Google](https://developers.google.com/drive/api/v3/quickstart/python). Please check this.
+### Sample script 1
 
-~~~python
+In this sample script for `oauth2client`.
+
+```python
 from httplib2 import Http
 from oauth2client import file, client, tools
 from getfilelistpy import getfilelist
@@ -96,18 +107,60 @@ resource = {
 }
 res = getfilelist.GetFileList(resource)  # or r = getfilelist.GetFolderTree(resource)
 print(res)
-~~~
+```
+
+<a name="googleauthoauthlibsample"></a>
+
+### Sample script 2
+
+In this sample script for `google_auth_oauthlib`, the process of OAuth2 uses [the quickstart of Google](https://developers.google.com/drive/api/v3/quickstart/python). Please check this.
+
+```python
+import pickle
+import os.path
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from getfilelistpy import getfilelist
+
+SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly'
+
+creds = None
+
+creFile = 'token.pickle'
+if os.path.exists(creFile):
+    with open(creFile, 'rb') as token:
+        creds = pickle.load(token)
+if not creds or not creds.valid:
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+    else:
+        flow = InstalledAppFlow.from_client_secrets_file(
+            'client_secret.json', SCOPES)
+        creds = flow.run_local_server()
+    with open(creFile, 'wb') as token:
+        pickle.dump(creds, token)
+
+resource = {
+    "oauth2": creds,
+    "id": "### Folder ID ###",
+    "fields": "files(name,id)",
+}
+res = getfilelist.GetFileList(resource)  # or r = getfilelist.GetFolderTree(resource)
+print(res)
+```
 
 ### Note
-- Here, as a sample, the script of the authorization uses the script of [quickstart](https://developers.google.com/drive/api/v3/quickstart/python).
-- You can modify the property of ``fields``. When this is not used, the default fields are used.
 
+- Here, as a sample, the script of the authorization uses the script of [quickstart](https://developers.google.com/drive/api/v3/quickstart/python).
+- You can modify the property of `fields`. When this is not used, the default fields are used.
 
 ## 3. Use Service account
+
 Document of Service account is [here](https://developers.google.com/identity/protocols/OAuth2ServiceAccount).
 
 ### Sample script
-~~~python
+
+```python
 from google.oauth2 import service_account
 from getfilelistpy import getfilelist
 
@@ -122,33 +175,52 @@ resource = {
 }
 res = getfilelist.GetFileList(resource)  # or r = getfilelist.GetFolderTree(resource)
 print(res)
-~~~
+```
 
 ### Note
-- You can modify the property of ``fields``. When this is not used, the default fields are used.
 
+- You can modify the property of `fields`. When this is not used, the default fields are used.
 
 # Values
+
 ![](images/downloadFolder_sample.png)
 
-As a sample, when the values are retrieved from above structure, the results of ``GetFolderTree()`` becomes as follows.
+As a sample, when the values are retrieved from above structure, the results of `GetFolderTree()` becomes as follows.
 
 ## Values retrieved by GetFolderTree()
-~~~python
+
+```python
 res = getfilelist.GetFolderTree(resource)
 print(res)
-~~~
+```
 
-~~~json
+```json
 {
   "id": [
     ["folderIdOfsampleFolder1"],
-    ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2a"],
-    ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b"],
-    ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2a","folderIdOfsampleFolder_2a_3a"],
-    ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3a"],
-    ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3b"],
-    ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3b","folderIdOfsampleFolder_2b_3b_4a"]
+    ["folderIdOfsampleFolder1", "folderIdOfsampleFolder_2a"],
+    ["folderIdOfsampleFolder1", "folderIdOfsampleFolder_2b"],
+    [
+      "folderIdOfsampleFolder1",
+      "folderIdOfsampleFolder_2a",
+      "folderIdOfsampleFolder_2a_3a"
+    ],
+    [
+      "folderIdOfsampleFolder1",
+      "folderIdOfsampleFolder_2b",
+      "folderIdOfsampleFolder_2b_3a"
+    ],
+    [
+      "folderIdOfsampleFolder1",
+      "folderIdOfsampleFolder_2b",
+      "folderIdOfsampleFolder_2b_3b"
+    ],
+    [
+      "folderIdOfsampleFolder1",
+      "folderIdOfsampleFolder_2b",
+      "folderIdOfsampleFolder_2b_3b",
+      "folderIdOfsampleFolder_2b_3b_4a"
+    ]
   ],
   "names": [
     "sampleFolder1",
@@ -169,15 +241,16 @@ print(res)
     "folderIdOfsampleFolder_2b_3b_4a"
   ]
 }
-~~~
+```
 
 ## Values retrieved by Do()
-~~~python
+
+```python
 res = getfilelist.GetFileList(resource)
 print(res)
-~~~
+```
 
-~~~json
+```json
 {
   "searchedFolder": {
     "id": "###",
@@ -187,18 +260,37 @@ print(res)
     "createdTime": "2000-01-01T01:23:45.000Z",
     "modifiedTime": "2000-01-01T01:23:45.000Z",
     "webViewLink": "https://drive.google.com/drive/folders/###",
-    "owners": [{"displayName": "###","permissionId": "###","emailAddress": "###"}],
+    "owners": [
+      { "displayName": "###", "permissionId": "###", "emailAddress": "###" }
+    ],
     "shared": true
   },
   "folderTree": {
     "id": [
       ["folderIdOfsampleFolder1"],
-      ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2a"],
-      ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b"],
-      ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2a","folderIdOfsampleFolder_2a_3a"],
-      ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3a"],
-      ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3b"],
-      ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3b","folderIdOfsampleFolder_2b_3b_4a"]
+      ["folderIdOfsampleFolder1", "folderIdOfsampleFolder_2a"],
+      ["folderIdOfsampleFolder1", "folderIdOfsampleFolder_2b"],
+      [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2a",
+        "folderIdOfsampleFolder_2a_3a"
+      ],
+      [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2b",
+        "folderIdOfsampleFolder_2b_3a"
+      ],
+      [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2b",
+        "folderIdOfsampleFolder_2b_3b"
+      ],
+      [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2b",
+        "folderIdOfsampleFolder_2b_3b",
+        "folderIdOfsampleFolder_2b_3b_4a"
+      ]
     ],
     "names": [
       "sampleFolder1",
@@ -230,7 +322,7 @@ print(res)
       ]
     },
     {
-      "folderTree": ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2a"],
+      "folderTree": ["folderIdOfsampleFolder1", "folderIdOfsampleFolder_2a"],
       "files": [
         {
           "name": "Spreadsheet2",
@@ -239,7 +331,7 @@ print(res)
       ]
     },
     {
-      "folderTree": ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b"],
+      "folderTree": ["folderIdOfsampleFolder1", "folderIdOfsampleFolder_2b"],
       "files": [
         {
           "name": "Spreadsheet4",
@@ -248,11 +340,19 @@ print(res)
       ]
     },
     {
-      "folderTree": ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2a","folderIdOfsampleFolder_2a_3a"],
+      "folderTree": [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2a",
+        "folderIdOfsampleFolder_2a_3a"
+      ],
       "files": null
     },
     {
-      "folderTree": ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3a"],
+      "folderTree": [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2b",
+        "folderIdOfsampleFolder_2b_3a"
+      ],
       "files": [
         {
           "name": "Spreadsheet3",
@@ -261,11 +361,20 @@ print(res)
       ]
     },
     {
-      "folderTree": ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3b"],
+      "folderTree": [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2b",
+        "folderIdOfsampleFolder_2b_3b"
+      ],
       "files": null
     },
     {
-      "folderTree": ["folderIdOfsampleFolder1","folderIdOfsampleFolder_2b","folderIdOfsampleFolder_2b_3b","folderIdOfsampleFolder_2b_3b_4a"],
+      "folderTree": [
+        "folderIdOfsampleFolder1",
+        "folderIdOfsampleFolder_2b",
+        "folderIdOfsampleFolder_2b_3b",
+        "folderIdOfsampleFolder_2b_3b_4a"
+      ],
       "files": [
         {
           "name": "Document1",
@@ -297,28 +406,38 @@ print(res)
   "totalNumberOfFiles": 10,
   "totalNumberOfFolders": 7
 }
-~~~
+```
 
------
+---
 
-<a name="Licence"></a>
+<a name="licence"></a>
+
 # Licence
+
 [MIT](LICENCE)
 
-<a name="Author"></a>
+<a name="author"></a>
+
 # Author
+
 [Tanaike](https://tanaikech.github.io/about/)
 
 If you have any questions and commissions for me, feel free to tell me.
 
 <a name="Update_History"></a>
+
 # Update History
-* v1.0.0 (November 17, 2018)
 
-    1. Initial release.
+- v1.0.0 (November 17, 2018)
 
-* v1.0.3 (July 16, 2019)
+  1. Initial release.
 
-    1. Markdown format was used to the readme file at [https://pypi.org/project/getfilelistpy/](https://pypi.org/project/getfilelistpy/).
+- v1.0.3 (July 16, 2019)
 
-[TOP](#TOP)
+  1. Markdown format was used to the readme file at [https://pypi.org/project/getfilelistpy/](https://pypi.org/project/getfilelistpy/).
+
+- v1.0.4 (August 23, 2019)
+
+  1. For OAuth2, `oauth2client` and `google_auth_oauthlib` got to be able to be used. About the sample script for `google_auth_oauthlib`, please see [this](#googleauthoauthlibsample).
+
+[TOP](#top)
