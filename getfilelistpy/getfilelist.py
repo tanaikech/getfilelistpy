@@ -2,7 +2,7 @@
 This is a python library to retrieve the file list with the folder tree
 from the specific folder of Google Drive.
 
-- This library retrieves all files from a folder in Google Drive.
+- This library retrieves all files from a folder in own Google Drive and shared Drives.
 - All files include the folder structure in Google Drive.
 - Only folder tree can be also retrieved.
 
@@ -24,9 +24,10 @@ res = getfilelist.GetFolderTree(resource)
 __author__ = "Kanshi TANAIKE (tanaike@hotmail.com)"
 __copyright__ = "Copyright 2018, Kanshi TANAIKE"
 __license__ = "MIT"
-__version__ = "1.0.1"
+__version__ = "1.0.5"
 
-from apiclient.discovery import build
+# from apiclient.discovery import build
+from apiclient.discovery import build as obuild
 from googleapiclient.discovery import build
 import collections as cl
 import googleapiclient
@@ -59,7 +60,7 @@ class getfilelist():
         if "oauth2" in resource.keys():
             creds = resource["oauth2"]
             if hasattr(creds, 'credentials') and not hasattr(creds, '_refresh_token'):
-                return build(api, version, http=creds)
+                return obuild(api, version, http=creds)
             if not hasattr(creds, 'credentials') and hasattr(creds, '_refresh_token'):
                 return build(api, version, credentials=creds)
         if "api_key" in resource.keys():
@@ -75,7 +76,7 @@ class getfilelist():
         return
 
     def __getList(self, ptoken, q, fields):
-        return self.service.files().list(q=q, fields=fields, orderBy="name", pageSize=1000, pageToken=ptoken or "").execute()
+        return self.service.files().list(q=q, fields=fields, orderBy="name", pageSize=1000, pageToken=ptoken or "", includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
 
     def __getListLoop(self, q, fields, values):
         nextPageToken = ""
@@ -180,7 +181,7 @@ class getfilelist():
 
     def __getFileInf(self):
         fields = "createdTime,id,mimeType,modifiedTime,name,owners,parents,shared,webContentLink,webViewLink"
-        return self.service.files().get(fileId=self.id, fields=fields).execute()
+        return self.service.files().get(fileId=self.id, fields=fields, supportsAllDrives=True).execute()
 
     def __init(self):
         self.e["rootId"] = self.id is None or self.id.lower() == "root"

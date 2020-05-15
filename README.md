@@ -440,4 +440,10 @@ If you have any questions and commissions for me, feel free to tell me.
 
   1. For OAuth2, `oauth2client` and `google_auth_oauthlib` got to be able to be used. About the sample script for `google_auth_oauthlib`, please see [this](#googleauthoauthlibsample).
 
+- v1.0.5 (May 15, 2020)
+
+  1. Shared drive got to be able to be used. The file list can be retrieved from both your Google Drive and the shared drive.
+
+     - For example, when the folder ID in the shared Drive is used `id` of `resource`, you can retrieve the file list from the folder in the shared Drive.
+
 [TOP](#top)
