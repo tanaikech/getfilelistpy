@@ -76,7 +76,11 @@ class getfilelist():
         return
 
     def __getList(self, ptoken, q, fields):
-        return self.service.files().list(q=q, fields=fields, orderBy="name", pageSize=1000, pageToken=ptoken or "", includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
+        if "driveId" in self.e["searchedFolder"]:
+            driveId = self.e["searchedFolder"].get("driveId")
+            return self.service.files().list(q=q, fields=fields, orderBy="name", pageSize=1000, pageToken=ptoken or "", includeItemsFromAllDrives=True, supportsAllDrives=True, corpora="drive", driveId=driveId).execute()
+        else:
+            return self.service.files().list(q=q, fields=fields, orderBy="name", pageSize=1000, pageToken=ptoken or "", includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
 
     def __getListLoop(self, q, fields, values):
         nextPageToken = ""
@@ -180,7 +184,7 @@ class getfilelist():
         return False
 
     def __getFileInf(self):
-        fields = "createdTime,id,mimeType,modifiedTime,name,owners,parents,shared,webContentLink,webViewLink"
+        fields = "createdTime,id,mimeType,modifiedTime,name,owners,parents,shared,webContentLink,webViewLink,driveId"
         return self.service.files().get(fileId=self.id, fields=fields, supportsAllDrives=True).execute()
 
     def __init(self):

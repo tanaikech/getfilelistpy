@@ -10,7 +10,7 @@ with open('README.md') as f:
 
 setup(
     name='getfilelistpy',
-    version='1.0.5',
+    version='1.0.6',
     description='This is a python library to retrieve the file list with the folder tree from the specific folder of Google Drive.',
     long_description=readme,
     long_description_content_type="text/markdown",

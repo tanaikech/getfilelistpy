@@ -456,4 +456,8 @@ If you have any questions and commissions for me, feel free to tell me.
 
      - For example, when the folder ID in the shared Drive is used `id` of `resource`, you can retrieve the file list from the folder in the shared Drive.
 
+- v1.0.5 (June 1, 2020)
+
+  1. When the file is retrieved from the shared drive, the parameter was not completed. This bug was removed.
+
 [TOP](#top)
