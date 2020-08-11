@@ -60,13 +60,13 @@ class getfilelist():
         if "oauth2" in resource.keys():
             creds = resource["oauth2"]
             if hasattr(creds, 'credentials') and not hasattr(creds, '_refresh_token'):
-                return obuild(api, version, http=creds)
+                return obuild(api, version, http=creds, cache_discovery=False)
             if not hasattr(creds, 'credentials') and hasattr(creds, '_refresh_token'):
-                return build(api, version, credentials=creds)
+                return build(api, version, credentials=creds, cache_discovery=False)
         if "api_key" in resource.keys():
-            return build(api, version, developerKey=resource["api_key"])
+            return build(api, version, developerKey=resource["api_key"], cache_discovery=False)
         if "service_account" in resource.keys():
-            return build(api, version, credentials=resource["service_account"])
+            return build(api, version, credentials=resource["service_account"], cache_discovery=False)
         try:
             raise ValueError(
                 "Error: You can use API key, OAuth2 and Service account.")
