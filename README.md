@@ -460,4 +460,8 @@ If you have any questions and commissions for me, feel free to tell me.
 
   1. When the file is retrieved from the shared drive, the parameter was not completed. This bug was removed.
 
+- v1.0.7 (August 11, 2020)
+
+  1. [Pull request](https://github.com/tanaikech/getfilelistpy/pull/4) was reflected.
+
 [TOP](#top)
